@@ -28,14 +28,14 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onError, disable
 // フォーム送信時に呼ばれる関数
   const onSubmit: SubmitHandler<RegisterFormInputs> = async (data) => {
     try {
-      await createUser(data);      // ユーザー登録処理
+      await createUser(data);      // ユーザー登録  処理新規登録処理の実装（api.ts/createUserを使用）
       onSuccess?.();               // 成功時コールバック呼び出し
     } catch (error) {
       console.error("登録エラー:", error);
       onError?.(error);            // 失敗時コールバック呼び出し
     }
   };
-
+  // 名前、メール、ロールが登録されるフォーム
   return (
     <Box sx={{ maxWidth: 400, mx: "auto", mt: 4 }}>
       <Typography variant="h5" gutterBottom>
