@@ -23,10 +23,12 @@ interface EditUserFormInputs {
 // コンポーネントに渡す props の型（userId が必要）
 interface EditUserFormProps {
   userId: number;
+  onSuccess?: () => void; // 更新成功時のコールバック
+  onError?: (error: any) => void; // 更新失敗時のコールバック
 }
 
 // ユーザー編集フォームコンポーネント
-const EditUserForm: React.FC<EditUserFormProps> = ({ userId }) => {
+const EditUserForm: React.FC<EditUserFormProps> = ({ userId, onSuccess, onError }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +44,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ userId }) => {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const user : User | null = await fetchUserById(userId);
+        const user: User | null = await fetchUserById(userId);
         if (!user) {
           throw new Error('ユーザーが見つかりません');
         }
@@ -63,9 +65,15 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ userId }) => {
   // フォーム送信時の処理（ユーザー情報の更新）
   const onSubmit: SubmitHandler<EditUserFormInputs> = async (data) => {
     try {
-      await updateUser(Number(userId), data); // API を使って更新
+      await updateUser(userId, data); // API を使って更新
+      if (onSuccess) {
+        onSuccess(); // 成功時にコールバック実行（例：一覧に遷移）
+      }
     } catch (err: any) {
       setError(err.message || 'ユーザー情報の更新に失敗しました');
+      if (onError) {
+        onError(err); // 失敗時にコールバック実行
+      }
     }
   };
 
