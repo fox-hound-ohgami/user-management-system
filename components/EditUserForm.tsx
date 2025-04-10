@@ -1,83 +1,77 @@
-'use client'; // クライアントコンポーネントとしてマーク
+'use client'; // Next.js のクライアントコンポーネントであることを指定
 
 import React, { useEffect, useState } from 'react';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form'; // フォーム管理ライブラリ
 import {
   TextField,
   Button,
   Box,
-  Typography,
   Alert,
   CircularProgress,
-} from '@mui/material';
-import { fetchUserById, updateUser } from '../utils/api';
-import { User } from '../types/User';
+} from '@mui/material'; // MUI の UI コンポーネント
+import { fetchUserById, updateUser } from '../utils/api'; // API 通信関数
+import { User } from '../types/User'; // ユーザー型のインポート
 
-// フォームの入力型
+// フォームの入力項目の型定義
 interface EditUserFormInputs {
   name: string;
   email: string;
   role: string;
 }
 
-// コンポーネントに渡す props の型（userId が必要）
+// コンポーネントの props 型定義（ユーザーIDとコールバック）
 interface EditUserFormProps {
-  userId: number;
-  onSuccess?: () => void; // 更新成功時のコールバック
-  onError?: (error: any) => void; // 更新失敗時のコールバック
+  userId: number; // 編集対象のユーザーID
+  onSuccess?: () => void; // 成功時の処理（任意）
+  onError?: (error: any) => void; // エラー時の処理（任意）
 }
 
-// ユーザー編集フォームコンポーネント
+// ユーザー編集フォームの定義
 const EditUserForm: React.FC<EditUserFormProps> = ({ userId, onSuccess, onError }) => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true); // ローディング状態
+  const [error, setError] = useState<string | null>(null); // エラー状態
 
-  // フォーム操作に必要な関数と状態を useForm で取得
+  // react-hook-form のフックを使用してフォーム制御
   const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
+    register, // フィールド登録
+    handleSubmit, // サブミット時の処理
+    reset, // フォーム初期化
+    formState: { errors, isSubmitting }, // エラーと送信中の状態
   } = useForm<EditUserFormInputs>();
 
-  // 初回レンダリング時に対象ユーザーのデータを取得
+  // ユーザー情報を API から取得してフォームに反映
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const user: User | null = await fetchUserById(userId);
-        if (!user) {
-          throw new Error('ユーザーが見つかりません');
-        }
+        const user: User | null = await fetchUserById(userId); // APIからユーザー取得
+        if (!user) throw new Error('ユーザーが見つかりません');
+        // フォームに初期値をセット
         reset({
           name: user.name,
           email: user.email,
           role: user.role,
-        }); // フォームに初期値を設定
-        setLoading(false); // ロード完了
+        });
+        setLoading(false); // ローディング解除
       } catch (err: any) {
-        setError(err.message || 'ユーザー情報の取得に失敗しました');
+        setError(err.message || 'ユーザー情報の取得に失敗しました'); // エラー表示
         setLoading(false);
       }
     };
     loadUser();
   }, [userId, reset]);
 
-  // フォーム送信時の処理（ユーザー情報の更新）
+  // フォーム送信時の処理（更新APIを呼び出す）
   const onSubmit: SubmitHandler<EditUserFormInputs> = async (data) => {
     try {
-      await updateUser(userId, data); // API を使って更新
-      if (onSuccess) {
-        onSuccess(); // 成功時にコールバック実行（例：一覧に遷移）
-      }
+      await updateUser(userId, data); // APIへ更新リクエスト
+      onSuccess?.(); // 成功時にコールバック実行（存在する場合）
     } catch (err: any) {
-      setError(err.message || 'ユーザー情報の更新に失敗しました');
-      if (onError) {
-        onError(err); // 失敗時にコールバック実行
-      }
+      setError(err.message || 'ユーザー情報の更新に失敗しました'); // エラーセット
+      onError?.(err); // エラー時コールバック実行（存在する場合）
     }
   };
 
-  // ローディング中はインジケーターを表示
+  // ローディング中はスピナーを表示
   if (loading) {
     return (
       <Box sx={{ textAlign: 'center', mt: 4 }}>
@@ -86,48 +80,73 @@ const EditUserForm: React.FC<EditUserFormProps> = ({ userId, onSuccess, onError 
     );
   }
 
-  // フォーム表示部分
   return (
     <Box sx={{ maxWidth: 400, mx: 'auto', mt: 4 }}>
-      <Typography variant="h5" gutterBottom>
-        ユーザー情報編集
-      </Typography>
+      {/* エラーメッセージ表示 */}
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
+      {/* フォーム本体 */}
       <form onSubmit={handleSubmit(onSubmit)}>
+        {/* 名前フィールド */}
         <TextField
           label="名前"
           fullWidth
           margin="normal"
-          {...register('name', { required: '名前は必須です' })}
+          {...register('name', {
+            required: '名前は必須です',
+            validate: value =>
+              value.trim() !== '' || '空白のみの入力は許可されていません',
+          })}
           error={!!errors.name}
           helperText={errors.name?.message}
         />
+
+        {/* メールアドレスフィールド */}
         <TextField
           label="メールアドレス"
           fullWidth
           margin="normal"
-          {...register('email', { required: 'メールアドレスは必須です' })}
+          {...register('email', {
+            required: 'メールアドレスは必須です',
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: '正しいメール形式で入力してください',
+            },
+            validate: value =>
+              value.trim() !== '' || '空白のみの入力は許可されていません',
+          })}
           error={!!errors.email}
           helperText={errors.email?.message}
         />
+
+        {/* 役割フィールド */}
         <TextField
           label="役割"
           fullWidth
           margin="normal"
-          {...register('role', { required: '役割は必須です' })}
+          {...register('role', {
+            required: '役割は必須です',
+            pattern: {
+              value: /^[a-zA-Z]+$/,
+              message: '英字（ローマ字）のみで入力してください',
+            },
+            validate: value =>
+              value.trim() !== '' || '空白のみの入力は許可されていません',
+          })}
           error={!!errors.role}
           helperText={errors.role?.message}
         />
+
+        {/* 送信ボタン */}
         <Button
           type="submit"
           variant="contained"
           color="primary"
           fullWidth
-          disabled={isSubmitting}
+          disabled={isSubmitting} // 送信中は無効化
           sx={{ mt: 2 }}
         >
           更新
