@@ -13,10 +13,7 @@ interface UserDetailsProps {
 const UserDetails: React.FC<UserDetailsProps> = ({ user }) => {
     return (
         <Box sx={{ p: 2, border: '1px solid #ccc', borderRadius: '8px', maxWidth: 400, mx: 'auto' }}>
-          <Typography variant="h5" gutterBottom>
-            ユーザー詳細
-          </Typography>
-          <Typography variant="h2">
+          <Typography variant="h6">
           <strong>名前:</strong> {user.name}
           </Typography>
           <Typography variant="body1">
