@@ -1,5 +1,6 @@
 import React from 'react';
 import { logicallyDeleteUser } from '../utils/api';
+import { Button } from '@mui/material';
 
 // 2-2.インターフェースの定義（DeleteUserButtonPropsを使用）
     // 削除ボタンに渡す props の型（インターフェース）を定義
@@ -30,12 +31,14 @@ const DeleteUserButton: React.FC<DeleteUserButtonProps> = ({ userId, onDelete })
 
   return (
 // 2-4: 削除ボタン（onClick で handleDelete を呼び出し）    
-    <button
-      onClick={handleDelete}
-      className="text-red-600 hover:underline"
-    >
-      削除
-    </button>
+<Button
+variant="outlined"
+color="error"
+size="small"
+onClick={handleDelete}
+>
+削除
+</Button>
   );
 };
 

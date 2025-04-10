@@ -28,6 +28,10 @@ const UserCard: React.FC<UserCardProps> = ({ user, onDelete }) => {
         <Button size="small" component={Link} href={`/users/${user.id}/edit`}>
           編集
         </Button>
+        {/* ✅ 追加：詳細ボタン */}
+        <Button size="small" component={Link} href={`/users/${user.id}/details`}>
+          詳細
+        </Button>
 
         {/* 2-3-2削除ボタンを DeleteUserButton に差し替え。削除時は onDeleted を呼ぶ */}
         <DeleteUserButton userId={user.id} onDelete={onDelete} />
