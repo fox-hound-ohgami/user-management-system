@@ -2,14 +2,27 @@ import React from 'react';
 import { Card, CardContent, Typography, CardActions, Button } from '@mui/material';
 import { User } from '../types/User';
 import Link from 'next/link';
-import DeleteUserButton from './DeleteUserButton';
+import CustomButton from './parts/CustomButton'; // ← 差し替え対象
+import { logicallyDeleteUser } from '../utils/api'; // ← 忘れずにインポート！
 
 interface UserCardProps {
   user: User;
-  onDelete: (userId: number) => void; // 削除後に呼ばれるコールバック関数を受け取る
+  onDelete: (userId: number) => void;
 }
 
 const UserCard: React.FC<UserCardProps> = ({ user, onDelete }) => {
+  const handleDelete = async () => {
+    if (confirm('本当にこのユーザーを削除しますか？')) {
+      try {
+        await logicallyDeleteUser(user.id); // ← userId じゃなくて user.id に修正
+        onDelete(user.id);
+      } catch (error) {
+        console.error('削除に失敗しました:', error);
+        alert('削除に失敗しました。');
+      }
+    }
+  };
+
   return (
     <Card sx={{ minWidth: 275, mb: 2 }}>
       <CardContent>
@@ -24,17 +37,21 @@ const UserCard: React.FC<UserCardProps> = ({ user, onDelete }) => {
         </Typography>
       </CardContent>
       <CardActions>
-        {/* 編集ボタン */}
         <Button size="small" component={Link} href={`/users/${user.id}/edit`}>
           編集
         </Button>
-        {/* ✅ 追加：詳細ボタン */}
         <Button size="small" component={Link} href={`/users/${user.id}/details`}>
           詳細
         </Button>
 
-        {/* 2-3-2削除ボタンを DeleteUserButton に差し替え。削除時は onDeleted を呼ぶ */}
-        <DeleteUserButton userId={user.id} onDelete={onDelete} />
+        {/* ✅ 削除ボタンを CustomButton に差し替え */}
+        <CustomButton
+          color="error"
+          size="small"
+          variant="outlined"
+          onClick={handleDelete}>
+          削除
+          </CustomButton>
       </CardActions>
     </Card>
   );
