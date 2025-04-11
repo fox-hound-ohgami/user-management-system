@@ -6,7 +6,8 @@ import { Card, CardContent, Typography, CardActions } from '@mui/material';
 // CustomCardPropsインターフェースは、カードに渡す必要があるpropsの型を定義しています。
 interface CustomCardProps {
   title: string;         // カードのタイトル
-  description: string;   // カードの説明
+  description: string; 
+  extraInfo?: string; // ← 追加（オプション扱い）  // カードの説明
   actions?: React.ReactNode; // カードのアクション（ボタンなど）。省略可能
 }
 
@@ -27,8 +28,13 @@ const CustomCard: React.FC<CustomCardProps> = ({ title, description, actions }) 
           説明文を表示します。 
           text.secondaryは文字色を暗くするために使っています。
         */}
-        <Typography variant="body2" color="text.secondary">
-          {description}  {/* descriptionが表示される部分 */}
+        <Typography variant="body2">
+          {description.split("\n").map((line, index) => (
+            <React.Fragment key={index}>
+              {line}
+              <br />
+            </React.Fragment>
+          ))}
         </Typography>
       </CardContent>
 

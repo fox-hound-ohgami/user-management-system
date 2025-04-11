@@ -3,7 +3,7 @@ import { Card, CardContent, Typography, CardActions, Button } from '@mui/materia
 import { User } from '../types/User';
 import Link from 'next/link';
 import CustomButton from './parts/CustomButton'; // ← 差し替え対象
-import { logicallyDeleteUser } from '../utils/api'; // ← 忘れずにインポート！
+import { logicallyDeleteUser } from '../utils/api'; 
 
 interface UserCardProps {
   user: User;

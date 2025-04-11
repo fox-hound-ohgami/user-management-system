@@ -1,34 +1,84 @@
 import React, { useState, useEffect } from 'react';
-import UserCard from './UserCard'; // UserCard コンポーネントをインポート
+import Link from 'next/link';
 import { User } from '../types/User';
+import CustomCard from './parts/CustomCard';
+import { logicallyDeleteUser } from '../utils/api';
+import CustomButton from './parts/CustomButton';
 
-// 2. UserListProps インターフェースを定義（users: User[] を使用）
+// propsで渡されたユーザーの型定義
 interface UserListProps {
-  users: User[]; // ユーザー情報の配列
+  users: User[];
 }
 
-// 1. UserList コンポーネントを定義
-// 3. UserListProps で定義した内容（users）を props として受け取る
+// ユーザー一覧を表示するコンポーネント
 const UserList: React.FC<UserListProps> = ({ users }) => {
-  // propsで受け取ったusersをstateにコピーしてローカルで管理（削除時に更新可能に）
+   // 表示するユーザーを state で管理（削除後に再描画するため）
   const [displayedUsers, setDisplayedUsers] = useState<User[]>(users);
 
-  // props.users が変わったときに state も更新
+   // propsの users が更新されたら displayedUsers も更新
   useEffect(() => {
     setDisplayedUsers(users);
   }, [users]);
 
-  // 2-3-3.ユーザーが削除されたときに呼び出される関数
-  const handleDelete = (userId: number) => {
-    // filter を使って対象ユーザーを除外し、再レンダリング
-    setDisplayedUsers((prev) => prev.filter((user) => user.id !== Number(userId)));
+    // 削除処理（確認ダイアログを表示 → API 呼び出し → UI 更新）
+  const handleDelete = async (userId: number) => {
+    if (confirm('本当にこのユーザーを削除しますか？')) {
+      try {
+        await logicallyDeleteUser(userId);
+        setDisplayedUsers((prevUsers) =>
+          prevUsers.filter((user) => user.id !== userId)
+        );
+      } catch (error) {
+        console.error('削除に失敗しました:', error);
+        alert('削除に失敗しました。');
+      }
+    }
   };
 
   return (
     <>
-      {/* 4. users のデータを使って UserCard コンポーネントを呼び出し */}
       {displayedUsers.map((user) => (
-        <UserCard key={user.id} user={user} onDelete={handleDelete} />
+        <CustomCard
+          key={user.id}
+          title={user.name}
+          description={`メール: ${user.email} /\n 役割: ${user.role}`}
+          actions={
+            <>
+              <Link href={`/users/${user.id}/edit`} passHref legacyBehavior>
+                <a style={{ textDecoration: 'none' }}>
+                  <CustomButton
+                    variantType="primary"
+                    size="small"
+                    variant="outlined"
+                  >
+                    編集
+                  </CustomButton>
+                </a>
+              </Link>
+
+              <Link href={`/users/${user.id}/details`} passHref legacyBehavior>
+                <a style={{ textDecoration: 'none' }}>
+                  <CustomButton
+                    variantType="secondary"
+                    size="small"
+                    variant="outlined"
+                  >
+                    詳細
+                  </CustomButton>
+                </a>
+              </Link>
+{/* 余分な余白なおす */}
+              <CustomButton
+                variantType="danger"
+                size="small"
+                variant="outlined"
+                onClick={() => handleDelete(user.id)}
+              >
+                削除
+              </CustomButton>
+            </>
+          }
+        />
       ))}
     </>
   );
