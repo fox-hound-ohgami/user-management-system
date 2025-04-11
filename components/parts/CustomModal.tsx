@@ -31,8 +31,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
   title, 
   content, 
   onClose, 
-  onConfirm 
-}) => {
+  onConfirm }) => {
   return (
     <Modal open={open} onClose={onClose}>
       <Box sx={style}>
