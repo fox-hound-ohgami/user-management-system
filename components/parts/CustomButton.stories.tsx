@@ -3,21 +3,33 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import CustomButton from "./CustomButton";
 
+// メタデータの設定
 const meta: Meta<typeof CustomButton> = {
-  title: "Components/Parts/CustomButton",
-  component: CustomButton,
-  tags: ["autodocs"],
+  title: "Components/Parts/CustomButton", // ストーリーのタイトル
+  component: CustomButton, // コンポーネントの指定
+  tags: ["autodocs"], // ドキュメンテーション生成
 };
 
-// TODO: メタデータのエクスポート
+export default meta;
 
-// TODO: ストーリーの定義
-
-export const Primary: Story = {
+// ストーリーの定義
+export const Primary: StoryObj<typeof CustomButton> = {
   args: {
-    variantType: "primary",
-    children: "Primary Button",
+    variantType: "primary", // ボタンタイプ：primary
+    children: "Primary Button", // ボタンのテキスト
   },
 };
 
-// TODO: 上記サンプルを参考に[Secondary][Danger]を設定する
+export const Secondary: StoryObj<typeof CustomButton> = {
+  args: {
+    variantType: "secondary", // ボタンタイプ：secondary
+    children: "Secondary Button", // ボタンのテキスト
+  },
+};
+
+export const Danger: StoryObj<typeof CustomButton> = {
+  args: {
+    variantType: "danger", // ボタンタイプ：danger
+    children: "Danger Button", // ボタンのテキスト
+  },
+};
